@@ -1,10 +1,11 @@
 'use strict';
 
-const 	ACTOR = 'actor',
-		LAVA = 'lava',
-		FIREBALL = 'fireball',
-		COIN = 'coin',
-		PLAYER = 'player';
+const 	ACTOR 		= 'actor'
+	,	LAVA 		= 'lava'
+	,	FIREBALL 	= 'fireball'
+	,	COIN 		= 'coin'
+	,	PLAYER 		= 'player'
+	,	WALL 		= 'wall';
 
 /*
 	Вектор
@@ -32,7 +33,7 @@ class Vector {
 		координаты которого будут суммой соответствующих координат суммируемых векторов.
 	*/
 	plus(v) {
-		if (v.constructor.name !== 'Vector') {
+		if (!(v instanceof Vector)) {
 			throw new Error('Можно прибавлять к вектору только вектор типа Vector');
 		} 
 		return new Vector(this.x + v.x, this.y + v.y);			
@@ -76,13 +77,13 @@ class Actor {
 		if (!speed) {
 			speed = new Vector(0, 0);
 		}
-		if (pos.constructor.name !== 'Vector') {
+		if (!(pos instanceof Vector)) {
 			throw new Error('Расположение не является объектом типа Vector');
 		} 
-		if (size.constructor.name !== 'Vector') {
+		if (!(size instanceof Vector)) {
 			throw new Error('Размер не является объектом типа Vector');
 		} 
-		if (speed.constructor.name !== 'Vector') {
+		if (!(speed instanceof Vector)) {
 			throw new Error('Скорость не является объектом типа Vector');
 		} 
 
@@ -139,7 +140,7 @@ class Actor {
 		Объекты, имеющие смежные границы, не пересекаются.
 	*/
 	isIntersect(obj) {
-		if ( !obj || (obj.constructor.name !== 'Actor') ) {
+		if ( !obj || !(obj instanceof Actor) ) {
 			throw new Error('Нужен объект типа Actor');
 		} 
 		if (obj === this) {
@@ -220,7 +221,7 @@ class Level {
 	constructor(grid=[], actors=[]) {
 		this.grid = grid;
 		this.actors = actors;
-		//this.player = new Player();
+		this.player = this.actors.find(actor => actor.type === PLAYER);
 		this.status = null;
 		this.finishDelay = 1;
 	}
@@ -261,7 +262,7 @@ class Level {
 		Если пересекается с несколькими объектами, вернет первый.
 	*/
 	actorAt(actor) {
-		if ( !actor || (actor.constructor.name !== 'Actor') ) {
+		if ( !actor || !(actor instanceof Actor) ) {
 			throw new Error('Нужен объект типа Actor');
 		}
 		return this.actors.find((elem) => elem.isIntersect(actor));
@@ -283,10 +284,21 @@ class Level {
 		Будем считать, что игровое поле слева, сверху и справа огорожено стеной и снизу у него смертельная лава.
 	*/
 	obstacleAt(pos, size) {
-		if ( !pos || (pos.constructor.name !== 'Vector') || !size || (size.constructor.name !== 'Vector') ) {
+		if ( !pos || !(pos instanceof Vector) || !size || !(size instanceof Vector) ) {
 			throw new Error('Нужен объект типа Vector');
 		}
-		// TODO !!!!!!!!!!!!!
+		if ( (pos.x < 0) || (pos.x + size.x > this.width) || (pos.y < 0) ) {
+			return WALL;
+		}
+		if (pos.y + size.y > this.height) {
+			return LAVA;
+		}
+		let actor = new Actor(pos, size);
+		let intersect = this.actors.find((elem) => elem.isIntersect(actor));
+		if (intersect) {
+			return intersect.type;
+		}
+		return intersect;
 	}
 
 	/*
@@ -295,7 +307,7 @@ class Level {
 		Принимает один аргумент, объект Actor. Находит и удаляет его.
 	*/
 	removeActor(actor) {
-		if ( !actor || (actor.constructor.name !== 'Actor') ) {
+		if ( !actor || !(actor instanceof Actor) ) {
 			return; //throw new Error('Нужен объект типа Actor');
 		}
 		let indexActor = this.actors.findIndex((elem) => elem === actor);
