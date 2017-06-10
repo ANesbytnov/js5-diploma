@@ -501,8 +501,8 @@ class LevelParser {
 		Если в словаре не нашлось ключа с таким символом, вернет undefined.
 	*/
 	actorFromSymbol(emblem) {
-		if (emblem) {
-			return this.dictionary[emblem];
+		if (emblem && this.dictionary) {
+			return this.dictionary[emblem];				
 		}
 	}
 
