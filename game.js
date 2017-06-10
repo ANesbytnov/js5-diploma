@@ -544,10 +544,18 @@ class LevelParser {
 		При этом, если этот конструктор не является экземпляром Actor, то такой символ игнорируется, и объект не создается.
 	*/
 	createActors(massif) {
+		let self = this;
 		return massif.reduce(function(prev, row, Y) {
 			[...row].forEach(function(c, X) {
-				if ( c && (c instanceof Actor) && this.actorFromSymbol(c) ) {
-					prev.push(new this.actorFromSymbol(c)(new Vector(X, Y)));	
+				if (c) {
+					let Creator = self.actorFromSymbol(c);
+					if (Creator && typeof (Creator) === "function") {
+						let pos = new Vector(X, Y);
+						let maybeActor = new Creator(pos);
+						if (maybeActor instanceof Actor) {
+							prev.push(maybeActor);
+						}
+					}
 				}
 			});
 			return prev;
