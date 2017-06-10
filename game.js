@@ -526,8 +526,8 @@ class LevelParser {
 		в ячейках которого хранится либо строка, соответствующая препятствию, либо undefined.
 		Движущиеся объекты не должны присутствовать на сетке.
 	*/
-	createGrid(massif) {
-		return massif.map(function(row) {
+	createGrid(arr) {
+		return arr.map(function(row) {
 			return [...row].map(elem => STATIC_GAME_OBJECTS[elem]);	
 		});
 	}
@@ -543,9 +543,9 @@ class LevelParser {
 		Для создания объекта должен быть использован конструктор из словаря, соответствующий символу. 
 		При этом, если этот конструктор не является экземпляром Actor, то такой символ игнорируется, и объект не создается.
 	*/
-	createActors(massif) {
+	createActors(arr) {
 		let self = this;
-		return massif.reduce(function(prev, row, Y) {
+		return arr.reduce(function(prev, row, Y) {
 			[...row].forEach(function(c, X) {
 				if (c) {
 					let Creator = self.actorFromSymbol(c);
@@ -567,8 +567,8 @@ class LevelParser {
 		Принимает массив строк, создает и возвращает игровое поле, 
 		заполненное препятствиями и движущимися объектами, полученными на основе символов и словаря.
 	*/
-	parse(massif) {
-		return new Level(this.createGrid(massif), this.createActors(massif));
+	parse(arr) {
+		return new Level(this.createGrid(arr), this.createActors(arr));
 	}
 }
 
