@@ -20,8 +20,7 @@ const GAME_OBJECTS = {
 
 const STATIC_GAME_OBJECTS = {
 	'x': WALL, 
-	'!': LAVA,
-	'o': COIN
+	'!': LAVA
 }
 
 /*
@@ -304,18 +303,26 @@ class Level {
 		if ( !pos || !(pos instanceof Vector) || !size || !(size instanceof Vector) ) {
 			throw new Error('Нужен объект типа Vector');
 		}
-		if ( (pos.x < 0) || (pos.x + size.x > this.width) || (pos.y < 0) ) {
+
+		let xLeft = Math.floor(pos.x);
+        let xRight = Math.floor(pos.x + size.x);
+        let yTop = Math.floor(pos.y);
+        let yBottom = Math.floor(pos.y + size.y);
+
+		if ( (xLeft < 0) || (xRight > this.width) || (yTop < 0) ) {
 			return WALL;
 		}
-		if (pos.y + size.y > this.height) {
+		if (yBottom > this.height) {
 			return LAVA;
 		}
-		let actor = new Actor(pos, size);
-		let intersect = this.actors.find((elem) => elem.isIntersect(actor));
-		if (intersect) {
-			return intersect.type;
+		let x, y;
+		for (x = xLeft; x <= xRight; x++) {
+			for (y = yTop; y <= yBottom; y++) {
+				if ( (this.grid[y][x] === WALL) || (this.grid[y][x] === LAVA) ) {
+					return this.grid[y][x];
+				}
+			}
 		}
-		return intersect;
 	}
 
 	/*
@@ -484,7 +491,6 @@ class LevelParser {
 			а значениями — конструкторы, с помощью которых можно создать новый объект.
 	*/
 	constructor(dictionary) {
-		//var dictionary = {'x', Wall.prototype}
 		this.dictionary = dictionary;
 	}
 
@@ -510,7 +516,7 @@ class LevelParser {
 	*/
 	obstacleFromSymbol(emblem) {
 		if (emblem) {
-			return GAME_OBJECTS[emblem];
+			return STATIC_GAME_OBJECTS[emblem];
 		}
 	}
 
@@ -522,9 +528,7 @@ class LevelParser {
 	*/
 	createGrid(massif) {
 		return massif.map(function(row) {
-			return Array.prototype.map.call(row, function(elem) {
-				return STATIC_GAME_OBJECTS[elem];	
-			});
+			return [...row].map(elem => STATIC_GAME_OBJECTS[elem]);	
 		});
 	}
 
@@ -540,7 +544,22 @@ class LevelParser {
 		При этом, если этот конструктор не является экземпляром Actor, то такой символ игнорируется, и объект не создается.
 	*/
 	createActors(massif) {
-		
+		return massif.reduce(function(prev, row, Y) {
+			[...row].forEach(function(c, X) {
+				if ( c && (c instanceof Actor) && (this.actorFromSymbol(c)) ) {
+					prev.push(new this.actorFromSymbol(c)(new Vector(X, Y)));	
+				}
+			});
+			return prev;
+		}, []);
 	}
 
+	/*
+		Метод parse
+		Принимает массив строк, создает и возвращает игровое поле, 
+		заполненное препятствиями и движущимися объектами, полученными на основе символов и словаря.
+	*/
+	parse(massif) {
+		return new Level(this.createGrid(massif), this.createActors(massif));
+	}
 }
