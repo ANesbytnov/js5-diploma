@@ -312,7 +312,7 @@ class Level {
 		if ( (xLeft < 0) || (xRight > this.width) || (yTop < 0) ) {
 			return WALL;
 		}
-		if (yBottom > this.height) {
+		if (yBottom >= this.height) {
 			return LAVA;
 		}
 		let x, y;
@@ -320,7 +320,7 @@ class Level {
 			for (y = yTop; y <= yBottom; y++) {
 				if ( (this.grid[y][x] === WALL) || (this.grid[y][x] === LAVA) ) {
 					return this.grid[y][x];
-				}
+				}						
 			}
 		}
 	}
@@ -347,7 +347,7 @@ class Level {
 		Возвращает true, если на игровом поле нет объектов этого типа (свойство type). Иначе возвращает false.
 	*/
 	noMoreActors(type) {
-		return this.actors.findIndex((elem) => elem.type === type) ? true : false;
+		return this.actors.findIndex((elem) => elem.type === type) === -1 ? true : false;
 	}
 
 	/*
