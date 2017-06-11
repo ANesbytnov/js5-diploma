@@ -347,7 +347,7 @@ class Level {
 		Возвращает true, если на игровом поле нет объектов этого типа (свойство type). Иначе возвращает false.
 	*/
 	noMoreActors(type) {
-		return this.actors.findIndex((elem) => elem.type === type) === -1 ? true : false;
+		return this.actors.findIndex((elem) => elem.type === type) === -1;
 	}
 
 	/*
